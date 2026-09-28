@@ -1,5 +1,7 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+import io
+from fastapi import APIRouter, Depends, HTTPException, status, Response
 from jose import JWTError, jwt
+import qrcode
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_db, get_current_active_patient, get_current_active_practitioner
@@ -20,6 +22,7 @@ router = APIRouter(prefix="/share", tags=["Compartir / Código QR"])
 
 @router.get("/qr/generate")
 def generate_qr_token(current_patient: Patient = Depends(get_current_active_patient)):
+    """Devuelve el token efímero en formato JSON/texto."""
     token = create_qr_share_token(patient_id=current_patient.user_id)
     return {
         "qr_token": token,
@@ -28,12 +31,52 @@ def generate_qr_token(current_patient: Patient = Depends(get_current_active_pati
     }
 
 
+@router.get(
+    "/qr/image",
+    summary="Descargar / Visualizar QR en PNG",
+    response_class=Response,
+    responses={
+        200: {
+            "content": {"image/png": {}},
+            "description": "Retorna la imagen del código QR renderizada en PNG."
+        }
+    }
+)
+def generate_qr_image(current_patient: Patient = Depends(get_current_active_patient)):
+    """
+    Genera el token efímero y lo compila en una imagen PNG en memoria.
+    El frontend móvil o web puede usar este endpoint directamente como src de un <img>.
+    """
+    token = create_qr_share_token(patient_id=current_patient.user_id)
+
+    # Configuración del código QR
+    qr = qrcode.QRCode(
+        version=None,  # Ajusta automáticamente el tamaño según la longitud del JWT
+        error_correction=qrcode.constants.ERROR_CORRECT_M,
+        box_size=10,
+        border=3,
+    )
+    qr.add_data(token)
+    qr.make(fit=True)
+
+    # Renderizar imagen en blanco y negro
+    img = qr.make_image(fill_color="black", back_color="white")
+
+    # Guardar en un buffer de memoria sin escribir en disco
+    buf = io.BytesIO()
+    img.save(buf, format="PNG")
+    buf.seek(0)
+
+    return Response(content=buf.getvalue(), media_type="image/png")
+
+
 @router.post("/qr/scan", response_model=ClinicalSummaryResponse)
 def scan_qr_token(
     qr_token: str,
     db: Session = Depends(get_db),
     current_practitioner: Practitioner = Depends(get_current_active_practitioner)
 ):
+    """El profesional de salud escanea el QR y desbloquea el resumen activo."""
     invalid_token_exception = HTTPException(
         status_code=status.HTTP_400_BAD_REQUEST,
         detail="El código QR es inválido o ha expirado."
