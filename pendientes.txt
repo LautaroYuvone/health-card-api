@@ -1,1 +1,0 @@
-1) Vincular el módulo "terminology.py" con un servidor de terminología externo (Sugerencia: Snowstorm o SISA)

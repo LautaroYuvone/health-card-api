@@ -6,3 +6,12 @@
 __pycache__/
 *.pyc
 .idea/
+
+# Archivos de notas y estructura personal
+estructura.txt
+pendientes.txt
+
+# Bases de datos locales
+*.db
+*.sqlite3
+tarjeta_sanitaria.db
