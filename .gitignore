@@ -1,0 +1,8 @@
+# Variables de entorno sensibles
+.env
+
+# Entornos virtuales y caché
+.venv/
+__pycache__/
+*.pyc
+.idea/
