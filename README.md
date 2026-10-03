@@ -1,6 +1,6 @@
 # Sanitary Card API (Tarjeta Sanitaria Digital)
 
-Backend para la emisión, gestión y consulta interoperable de resúmenes clínicos de emergencia (Tarjeta Sanitaria), diseñado bajo estándares internacionales de informática médica (**HL7 FHIR R4** e **IPS**) y terminologías clínicas controladas (**SNOMED-CT**, **LOINC**).
+Backend para la emisión, gestión y consulta interoperable de resúmenes clínicos (Tarjeta Sanitaria), diseñado bajo estándares internacionales de informática médica (**HL7 FHIR R4** e **IPS**) y terminologías clínicas controladas (**SNOMED-CT**, **LOINC**).
 
 ---
 
@@ -17,7 +17,7 @@ Esta fragmentación de la información genera:
 
 ## 💡 Solución
 
-Una API REST orientada a la **soberanía del paciente** y la **certificación profesional**:
+Una API REST orientada al **empoderamiento del paciente** y la **certificación profesional**:
 1. **Certificación Médica:** Solo profesionales matriculados pueden emitir o actualizar la tarjeta sanitaria, sellando cada versión con su matrícula profesional.
 2. **Versionado Inmutable:** Cada actualización desactiva la versión anterior y crea una nueva, preservando la trazabilidad y la validez médico-legal.
 3. **Compartición Segura vía QR:** El paciente genera un token criptográfico efímero (15 minutos). La historia solo puede ser descifrada y visualizada por médicos autenticados en el sistema.
