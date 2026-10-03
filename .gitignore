@@ -10,6 +10,7 @@ __pycache__/
 # Archivos de notas y estructura personal
 estructura.txt
 pendientes.txt
+Glosario.txt
 
 # Bases de datos locales
 *.db
