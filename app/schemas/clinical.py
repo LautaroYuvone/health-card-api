@@ -1,47 +1,29 @@
 from datetime import date, datetime
 from typing import List, Optional
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
-
-# class CodedConcept(BaseModel):
-#     """Representación mínima de un concepto codificado (SNOMED-CT, CIE-10, ATC)."""
-#     system: str = Field(..., examples="http://snomed.info/sct")
-#     code: str = Field(..., examples="44054006")
-#     display: str = Field(..., examples="Diabetes mellitus tipo 2")
 
 class CodedConcept(BaseModel):
+    """Representación mínima de un concepto codificado (SNOMED-CT, CIE-10, ATC)."""
     system: str = Field(..., examples=["http://snomed.info/sct"])
     code: str = Field(..., examples=["44054006"])
     display: str = Field(..., examples=["Diabetes mellitus tipo 2"])
 
 
-# class AllergyEntry(BaseModel):
-#     substance: CodedConcept
-#     criticality: Optional[str] = Field("low", example="high") # low, high, unable-to-assess
-
 class AllergyEntry(BaseModel):
     substance: CodedConcept
     criticality: Optional[str] = Field("low", examples=["high"])
 
-# class ConditionEntry(BaseModel):
-#     condition: CodedConcept
-#     clinical_status: str = Field("active", example="active") # active, resolved, inactive
-#     onset_date: Optional[date] = None
 
 class ConditionEntry(BaseModel):
     condition: CodedConcept
     clinical_status: str = Field("active", examples=["active"])
 
-# class MedicationEntry(BaseModel):
-#     medication: CodedConcept
-#     dosage: str = Field(..., examples="500 mg")
-#     frecuency: str = Field(..., examples="Cada 12 horas")
-#     is_chronic: bool = True
 
 class MedicationEntry(BaseModel):
     medication: CodedConcept
-    dosage: str = Field(..., example="500 mg")
-    frequency: str = Field(..., example="Cada 12 horas")
+    dosage: str = Field(..., examples=["500 mg"])
+    frequency: str = Field(..., examples=["Cada 12 horas"])
     is_chronic: bool = True
 
 
@@ -58,7 +40,7 @@ class ClinicalSummaryCreate(BaseModel):
     conditions: List[ConditionEntry] = []
     medications: List[MedicationEntry] = []
     procedures: List[ProcedureEntry] = []
-    blood_type: Optional[str] = Field(None, example="0+")
+    blood_type: Optional[str] = Field(None, examples=["0+"])
     emergency_notes: Optional[str] = None
 
 
@@ -70,6 +52,5 @@ class ClinicalSummaryResponse(ClinicalSummaryCreate):
     version: int
     created_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
