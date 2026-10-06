@@ -1,4 +1,4 @@
-# Sanitary Card API (Tarjeta Sanitaria Digital)
+# Health Card API (Tarjeta Sanitaria Digital)
 
 Backend para la emisión, gestión y consulta interoperable de resúmenes clínicos (Tarjeta Sanitaria), diseñado bajo estándares internacionales de informática médica (**HL7 FHIR R4** e **IPS**) y terminologías clínicas controladas (**SNOMED-CT**, **LOINC**).
 
