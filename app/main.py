@@ -3,6 +3,7 @@ from app.api.v1 import auth, summaries, share, terminology
 from app.core.config import settings
 from app.db.base import Base
 from app.db.session import engine
+from app.models.audit import AccessLog
 
 # En desarrollo crea las tablas automáticamente si no existen
 Base.metadata.create_all(bind=engine)

@@ -1,10 +1,12 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Response
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_db, get_current_active_practitioner, get_current_active_patient
 from app.models.summary import ClinicalSummary
 from app.models.user import Practitioner, Patient, User
 from app.schemas.clinical import ClinicalSummaryCreate, ClinicalSummaryResponse
+from app.core.security import create_qr_share_token
+from app.services.pdf import generate_summary_pdf
 
 from app.schemas.fhir import create_fhir_ips_bundle
 
@@ -104,4 +106,51 @@ def get_my_summary_fhir(
         summary=summary,
         patient_user=patient_user,
         practitioner=practitioner
+    )
+
+
+@router.get(
+    "/me/pdf",
+    summary="Descargar Carta Sanitaria en PDF",
+    response_class=Response,
+    responses={
+        200: {
+            "content": {"application/pdf": {}},
+            "description": "Retorna el resumen clínico completo en formato PDF imprimible."
+        }
+    }
+)
+def download_my_summary_pdf(
+    db: Session = Depends(get_db),
+    current_patient: Patient = Depends(get_current_active_patient)
+):
+    """
+    Genera y descarga la Carta Sanitaria del paciente en PDF,
+    incluyendo sus antecedentes codificados y el QR firmado.
+    """
+    summary = (
+        db.query(ClinicalSummary)
+        .filter(ClinicalSummary.patient_id == current_patient.user_id, ClinicalSummary.is_active == True)
+        .first()
+    )
+    if not summary:
+        raise HTTPException(status_code=404, detail="No tienes una Carta Sanitaria generada.")
+
+    practitioner = db.query(Practitioner).filter(Practitioner.id == summary.practitioner_id).first()
+    patient_user = current_patient.user
+
+    # Generamos un token efímero QR para embeberlo en el documento
+    qr_token = create_qr_share_token(patient_id=current_patient.user_id)
+
+    pdf_bytes = generate_summary_pdf(
+        summary=summary,
+        patient_user=patient_user,
+        practitioner=practitioner,
+        qr_token=qr_token
+    )
+
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={"Content-Disposition": 'attachment; filename="carta_sanitaria.pdf"'}
     )
